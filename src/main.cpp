@@ -1,12 +1,13 @@
 #include "echlib.h"
 
 int main() {
-    MakeWindow(1920, 1080, "Hello World");
+    MakeWindow(600, 600, "Hello World");
 
     while (!WindowShouldClose()) {
         StartDrawing();
 
         ClearBackground(BLACK);
+        DrawTriangle(0.0f, 0.0f, 1.0f, 1.0f, RED);
 
         EndDrawing();
     }
