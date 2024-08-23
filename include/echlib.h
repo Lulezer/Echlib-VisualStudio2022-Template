@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-	// Colors (all using floating-point format)
+// Colors
 #define RED 1.0f, 0.0f, 0.0f, 1.0f        // Red
 #define GREEN 0.0f, 1.0f, 0.0f, 1.0f      // Green
 #define BLUE 0.0f, 0.0f, 1.0f, 1.0f       // Blue
@@ -25,13 +25,13 @@ extern "C" {
 #define DARK_GREEN 0.0f, 0.459f, 0.173f, 1.0f     // Dark Green (0/255, 117/255, 44/255)
 #define LIGHT_CORAL 0.941f, 0.502f, 0.502f, 1.0f   // Light Coral (240/255, 128/255, 128/255)
 
-// Function declarations
 	void MakeWindow(int width, int height, const char* title);
 	void CloseWindow();
 	int WindowShouldClose();
 	void StartDrawing();
 	void EndDrawing();
 	void ClearBackground(float r, float g, float b, float a);
+	void DrawTriangle(float x, float y, float width, float height, float r, float g, float b, float a);
 
 #ifdef __cplusplus
 }
