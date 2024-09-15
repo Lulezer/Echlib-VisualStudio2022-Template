@@ -1,6 +1,6 @@
 # Echlib
 
-A libary made to Help Beginners start Making Games
+A libary made to Help People start Making Games
 
 An easy and OpenSource GameDev Libary
 
