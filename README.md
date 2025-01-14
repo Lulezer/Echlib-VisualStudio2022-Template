@@ -1,4 +1,4 @@
-# Echlib
+# Echlib 
 
 A libary made to Help People start Making Games
 
@@ -20,9 +20,6 @@ Feutures include:
 - AI and Pathfinding
 - Cross-Platform Support (Future Consideration)
 
-- Plan On turning it into an Open source Game engine
 
-
-
-# STILL IN DEVELOPMENT NOT EVERYTHHING IS STILL BEING IMPLEMENTED NOT ALL FEUTURES MIGHT BE IMPLEMENTED#
-# OTHER FEUTURES MIGHT ALSO BE IMPLEMENTEFD #
+# STILL IN DEVELOPMENT NOT EVERYTHHING IS STILL BEING IMPLEMENTED NOT ALL FEUTURES MIGHT BE IMPLEMENTED
+# OTHER FEUTURES MIGHT ALSO BE IMPLEMENTEFD 
