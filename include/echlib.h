@@ -3,34 +3,100 @@
 
 #include <GLFW/glfw3.h>
 #include <raudio.h>
+#include <string>
+#include <unordered_map>
+#include <glad/glad.h>
+#include <vector>
+#include <array>
+#include <iostream>
+#include "stb_truetype/stb_truetype.h"
+#include <stb_image/stb_image.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <fstream>
+#include <ostream>
+
+#define FONT_BITMAP_WIDTH 1024 * 2
+#define FONT_BITMAP_HEIGHT 1024 * 2
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// Colors
-#define RED 1.0f, 0.0f, 0.0f, 1.0f
-#define GREEN 0.0f, 1.0f, 0.0f, 1.0f
-#define BLUE 0.0f, 0.0f, 1.0f, 1.0f
-#define WHITE 1.0f, 1.0f, 1.0f, 1.0f
-#define BLACK 0.0f, 0.0f, 0.0f, 1.0f
-#define GRAY 0.5f, 0.5f, 0.5f, 1.0f
-#define YELLOW 1.0f, 1.0f, 0.0f, 1.0f
-#define CYAN 0.0f, 1.0f, 1.0f, 1.0f
-#define MAGENTA 1.0f, 0.0f, 1.0f, 1.0f
-#define ORANGE 1.0f, 0.647f, 0.0f, 1.0f
-#define PURPLE 0.5f, 0.0f, 0.5f, 1.0f
-#define PINK 1.0f, 0.75f, 0.796f, 1.0f
-#define BROWN 0.545f, 0.298f, 0.149f, 1.0f
-#define LIGHT_BLUE 0.678f, 0.847f, 0.902f, 1.0f
-#define BEIGE 0.827f, 0.690f, 0.514f, 1.0f
-#define LIGHT_GREEN 0.565f, 0.933f, 0.565f, 1.0f
-#define DARK_GREEN 0.0f, 0.459f, 0.173f, 1.0f
-#define LIGHT_CORAL 0.941f, 0.502f, 0.502f, 1.0f
 
 
-// Keys
+namespace ech {
+
+    extern int windowWidth;
+    extern int windowHeight;
+    extern float transparency;
+
+
+
+    // Define a Color struct
+    struct Color {
+        float r, g, b, a;
+    };
+
+    extern std::unordered_map<std::string, GLuint> textures;
+
+    enum class TextureType {
+        NEAREST = GL_NEAREST,
+        LINEAR = GL_LINEAR
+    };
+
+    struct Texture2D {
+        unsigned int id;      // OpenGL texture ID
+        int width, height;    // Texture dimensions
+    };
+
+    struct Camera {
+        float x, y;          // Position
+        float rotation;      // Rotation in degrees
+        float zoom;          // Zoom level 
+
+        Camera() : x(0), y(0), rotation(0), zoom(1.0f) {} // Constructor to initialize defaults
+    };
+
+    inline Camera camera; // Declare a global camera instance
+
+    struct Font {
+        GLuint textureID;
+        int textureWidth;
+        int textureHeight;
+        stbtt_bakedchar characterData[256]; // 95 ASCII characters
+    };
+
+    struct Vec2 {
+        float x, y;
+    };
+
+    inline Font font;
+
+    struct CollisionShape {
+        float x, y, width, height;
+
+        bool CheckCollision(const CollisionShape& other);  // Declare function
+    };
+
+    // Define common colors
+    const Color WHITE = { 1.0f, 1.0f, 1.0f, transparency };   // Full white
+    const Color BLACK = { 0.0f, 0.0f, 0.0f, transparency };   // Full black
+    const Color RED = { 1.0f, 0.0f, 0.0f, transparency };     // Red
+    const Color GRAY = { 0.5f, 0.5f, 0.5f, transparency };    // Gray
+    const Color YELLOW = { 1.0f, 1.0f, 0.0f, transparency };  // Yellow
+    const Color CYAN = { 0.0f, 1.0f, 1.0f, transparency };    // Cyan
+    const Color MAGENTA = { 1.0f, 0.0f, 1.0f, transparency }; // Magenta
+    const Color ORANGE = { 1.0f, 0.647f, 0.0f, transparency }; // Orange
+    const Color PURPLE = { 0.5f, 0.0f, 0.5f, transparency };  // Purple
+    const Color PINK = { 1.0f, 0.75f, 0.796f, transparency }; // Pink
+    const Color BROWN = { 0.545f, 0.298f, 0.149f, transparency }; // Brown
+    const Color LIGHT_BLUE = { 0.678f, 0.847f, 0.902f, transparency }; // Light Blue
+    const Color BEIGE = { 0.827f, 0.690f, 0.514f, transparency }; // Beige
+    const Color LIGHT_GREEN = { 0.565f, 0.933f, 0.565f, transparency }; // Light Green
+    const Color DARK_GREEN = { 0.0f, 0.459f, 0.173f, transparency };  // Dark Green
+    const Color LIGHT_CORAL = { 0.941f, 0.502f, 0.502f, transparency }; // Light Coral
+    const Color TRANSPARENT = { 0, 0, 0, 0 };
+
+    // Keys (key codes)
 #define KEY_UNKNOWN GLFW_KEY_UNKNOWN
 #define KEY_SPACE GLFW_KEY_SPACE
 #define KEY_APOSTROPHE GLFW_KEY_APOSTROPHE
@@ -159,29 +225,108 @@ extern "C" {
 #define KEY_RIGHT_SUPER GLFW_KEY_RIGHT_SUPER
 #define KEY_MENU GLFW_KEY_MENU
 
-// Functions
+#define MOUSE_LEFT_BUTTON GLFW_MOUSE_BUTTON_LEFT
+#define MOUSE_RIGHT_BUTTON GLFW_MOUSE_BUTTON_RIGHT
+#define MOUSE_MIDDLE_BUTTON GLFW_MOUSE_BUTTON_MIDDLE
 
-	//	Window Managment
-	void MakeWindow(int width, int height, const char* title);
-	void CloseWindow();
-	int WindowShouldClose();
-	void StartDrawing();
-	void EndDrawing();
-	void ClearBackground(float r, float g, float b, float a);
-	void SetTargetFps(int targetFps);
+    // Function declarations
+    void MakeWindow(int width, int height, const char* title);
+    void CloseWindow();
+    int WindowShouldClose();
+    void StartDrawing();
+    void EndDrawing();
+    void ClearBackground(Color color);
+    void SetTargetFps(int targetFps);
+
+    // Shape Rendering
+    void DrawTriangle(float x, float y, float width, float height, const Color& color);
+    void DrawRectangle(float x, float y, float width, float height, const Color& color);
+    void DrawProRectangle(float x, float y, float width, float height, const Color& color, float angle, float transparency);
+    void DrawCircle(float centerX, float centerY, float radius, const Color& color, int segments = 36);
+    void DrawProCircle(float centerX, float centerY, float radius, const Color& color, int segments, float transparency);
+    void DrawProTriangle(float x, float y, float width, float height, const Color& color, float transparency);
+    void DrawProTexturedRectangle(float x, float y, float width, float height, float rotation, float alpha, const std::string& name);
+
+    // Input System
+    int IsKeyPressed(int key);
+    int IsKeyHeld(int key);
+
+    int IsMouseButtonPressed(int button);
+    int IsMouseButtonHeld(int button);
+
+    // Texture Rendering
+    void LoadTexture(const char* filepath, const std::string& name);
+    void DrawTexturedRectangle(float x, float y, float width, float height, const std::string& name);
+
+    bool LoadFont(const char* fontFile, int fontSize, Font& outFont);
+    void DrawText(Font& font, const char* text, float x, float y, int fontSize, Color color);
+
+    // Time Management
+    float GetDeltaTime();
+
+    //  Mouse Stuff
+    void GetMousePosition(double& x, double& y);
+
+    // Collision
 
 
-	//	Shape Rendering
-	void DrawTriangle(float x, float y, float width, float height, float r, float g, float b, float a);
-	void DrawSquare(float x, float y, float width, float height, float r, float g, float b, float a);
+    void DrawRectangleCollisionShape(float x, float y, float width, float height, const Color& color);
 
-	//	Input System
-	int IsKeyPressed(int key);
-	int IsKeyHeld(int key);
+    // Template function to save data to a file
+    template <typename T>
+    inline void savefile(const std::string& filename, const T& data) {
+        std::ofstream file(filename, std::ios::binary);
+        if (file.is_open()) {
+            file.write(reinterpret_cast<const char*>(&data), sizeof(T));
+            file.close();
+        }
+        else {
+            std::cerr << "Failed to open file for saving: " << filename << std::endl;
+        }
+    }
 
-	
-#ifdef __cplusplus
-}
-#endif
+    // Template function to load data from a file
+    template <typename T>
+    inline void loadfile(const std::string& filename, T& data) {
+        std::ifstream file(filename, std::ios::binary);
+        if (file.is_open()) {
+            file.read(reinterpret_cast<char*>(&data), sizeof(T));
+            file.close();
+        }
+        else {
+            std::cerr << "Failed to open file for loading: " << filename << std::endl;
+        }
+    }
+
+    // Specialized version of savefile for std::string
+    template <>
+    inline void savefile<std::string>(const std::string& filename, const std::string& data) {
+        std::ofstream file(filename);
+        if (file.is_open()) {
+            file << data;
+            file.close();
+        }
+        else {
+            std::cerr << "Failed to open file for saving string: " << filename << std::endl;
+        }
+    }
+
+    // Specialized version of loadfile for std::string
+    template <>
+    inline void loadfile<std::string>(const std::string& filename, std::string& data) {
+        std::ifstream file(filename);
+        if (file.is_open()) {
+            std::getline(file, data, '\0'); // Read entire file
+            file.close();
+        }
+        else {
+            std::cerr << "Failed to open file for loading string: " << filename << std::endl;
+        }
+    }
+
+    
+
+
+} // namespace ech
 
 #endif // ECHLIB_H
